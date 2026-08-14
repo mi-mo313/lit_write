@@ -18,43 +18,52 @@ import { keyframes } from "@mui/system";
 import { useRouter } from "next/navigation";
 import React from "react";
 
+import apiFetcher from "@/helper/apiFetcher";
+import { useAuth } from "@/context/auth";
+
 const float = keyframes`
-0%{
-transform:translateY(0) rotate(0deg);
-}
-50%{
-transform:translateY(-20px) rotate(8deg);
-}
-100%{
-transform:translateY(0) rotate(0deg);
-}
+  0% {
+    transform: translateY(0) rotate(0deg);
+  }
+
+  50% {
+    transform: translateY(-20px) rotate(8deg);
+  }
+
+  100% {
+    transform: translateY(0) rotate(0deg);
+  }
 `;
 
 const moveGradient = keyframes`
-0%{
-background-position:0% 50%;
-}
-50%{
-background-position:100% 50%;
-}
-100%{
-background-position:0% 50%;
-}
+  0% {
+    background-position: 0% 50%;
+  }
+
+  50% {
+    background-position: 100% 50%;
+  }
+
+  100% {
+    background-position: 0% 50%;
+  }
 `;
 
 const pulse = keyframes`
-0%{
-transform:scale(1);
-opacity:.4;
-}
-50%{
-transform:scale(1.2);
-opacity:.8;
-}
-100%{
-transform:scale(1);
-opacity:.4;
-}
+  0% {
+    transform: scale(1);
+    opacity: .4;
+  }
+
+  50% {
+    transform: scale(1.2);
+    opacity: .8;
+  }
+
+  100% {
+    transform: scale(1);
+    opacity: .4;
+  }
 `;
 
 interface FloatingIconProps {
@@ -64,7 +73,12 @@ interface FloatingIconProps {
   delay: string;
 }
 
-function FloatingIcon({ children, top, left, delay }: FloatingIconProps) {
+function FloatingIcon({
+  children,
+  top,
+  left,
+  delay,
+}: FloatingIconProps) {
   return (
     <Box
       sx={{
@@ -84,11 +98,55 @@ function FloatingIcon({ children, top, left, delay }: FloatingIconProps) {
   );
 }
 
+interface LoginResponse {
+  accessToken: string;
+  user: {
+    id: string;
+    username: string;
+    email: string;
+    role: string;
+  };
+}
+
 export default function Login() {
   const router = useRouter();
-  const adornmentId = React.useId();
+
+  const { login } = useAuth();
+
   const [email, setEmail] = React.useState("");
   const [password, setPassword] = React.useState("");
+  const [error, setError] = React.useState("");
+
+  async function handleLogin() {
+    setError("");
+
+    try {
+      const response = await apiFetcher<LoginResponse>(
+        "/auth/login",
+        {
+          method: "POST",
+          body: JSON.stringify({
+            email,
+            password,
+          }),
+        }
+      );
+
+      console.log(response.status);
+      console.log(response.data);
+
+      login(
+        response.data.accessToken,
+        response.data.user
+      );
+
+           router.push("/editor")
+    } catch (error) {
+      console.error(error);
+
+      setError("Invalid email or password");
+    }
+  }
 
   return (
     <Box
@@ -99,7 +157,8 @@ export default function Login() {
         display: "flex",
         justifyContent: "center",
         alignItems: "center",
-        background: "linear-gradient(-45deg,#020617,#0f172a,#1e1b4b,#111827)",
+        background:
+          "linear-gradient(-45deg,#020617,#0f172a,#1e1b4b,#111827)",
         backgroundSize: "400% 400%",
         animation: `${moveGradient} 20s ease infinite`,
       }}
@@ -112,9 +171,16 @@ export default function Login() {
           inset: 0,
           opacity: 0.05,
           backgroundImage: `
-          linear-gradient(rgba(255,255,255,.3) 1px, transparent 1px),
-          linear-gradient(90deg, rgba(255,255,255,.3) 1px, transparent 1px)
-        `,
+            linear-gradient(
+              rgba(255,255,255,.3) 1px,
+              transparent 1px
+            ),
+            linear-gradient(
+              90deg,
+              rgba(255,255,255,.3) 1px,
+              transparent 1px
+            )
+          `,
           backgroundSize: "50px 50px",
         }}
       />
@@ -153,23 +219,39 @@ export default function Login() {
 
       {/* Floating Icons */}
 
-      <FloatingIcon top="12%" left="12%" delay="0s">
+      <FloatingIcon
+        top="12%"
+        left="12%"
+        delay="0s"
+      >
         <EditIcon />
       </FloatingIcon>
 
-      <FloatingIcon top="20%" left="80%" delay="1s">
+      <FloatingIcon
+        top="20%"
+        left="80%"
+        delay="1s"
+      >
         <AutoStoriesIcon />
       </FloatingIcon>
 
-      <FloatingIcon top="75%" left="14%" delay="2s">
+      <FloatingIcon
+        top="75%"
+        left="14%"
+        delay="2s"
+      >
         <LocalFireDepartmentIcon />
       </FloatingIcon>
 
-      <FloatingIcon top="72%" left="82%" delay="3s">
+      <FloatingIcon
+        top="72%"
+        left="82%"
+        delay="3s"
+      >
         <EditIcon />
       </FloatingIcon>
 
-      {/* Hero */}
+      {/* Login */}
 
       <Container maxWidth="md">
         <Box
@@ -199,53 +281,96 @@ export default function Login() {
           >
             login
           </Typography>
-          <FormControl variant="standard" sx={{ width: "100%", mt: 3 }}>
+
+          {/* Email */}
+
+          <FormControl
+            variant="standard"
+            sx={{
+              width: "100%",
+              mt: 3,
+            }}
+          >
             <InputLabel
-              htmlFor={`${adornmentId}-input`}
-              sx={{ color: "rgba(255,255,255,.7)" }}
+              htmlFor="email-input"
+              sx={{
+                color: "rgba(255,255,255,.7)",
+              }}
             >
               Email
             </InputLabel>
-            <Input
-            value={email}
-            onChange={(e)=>{
-              setEmail(e.target.value);
-            }}
-              id={`${adornmentId}-input`}
-              sx={{ color: "white" }}
-              startAdornment={
-                <InputAdornment position="start">
-                  {/* icon or text here, e.g. an EmailIcon */}
-                </InputAdornment>
-              }
-            />
-          </FormControl>
-          <FormControl variant="standard" sx={{ width: "100%", mt: 3 }}>
-            <InputLabel
-              htmlFor={`${adornmentId}-input`}
-              sx={{ color: "rgba(255,255,255,.7)" }}
-            >
-              password
-            </InputLabel>
-            <Input
-            value={password}
-                        onChange={(e)=>{
-                setPassword(e.target.value);
-                        }}
 
-              id={`${adornmentId}-input`}
-              sx={{ color: "white" }}
+            <Input
+              id="email-input"
+              type="email"
+              value={email}
+              onChange={(e) => {
+                setEmail(e.target.value);
+              }}
+              sx={{
+                color: "white",
+              }}
               startAdornment={
                 <InputAdornment position="start">
-                  {/* icon or text here, e.g. an EmailIcon */}
+                  {/* Email icon */}
                 </InputAdornment>
               }
             />
           </FormControl>
-          <Button
-            onClick={() => {
-              console.log(email, password);
+
+          {/* Password */}
+
+          <FormControl
+            variant="standard"
+            sx={{
+              width: "100%",
+              mt: 3,
             }}
+          >
+            <InputLabel
+              htmlFor="password-input"
+              sx={{
+                color: "rgba(255,255,255,.7)",
+              }}
+            >
+              Password
+            </InputLabel>
+
+            <Input
+              id="password-input"
+              type="password"
+              value={password}
+              onChange={(e) => {
+                setPassword(e.target.value);
+              }}
+              sx={{
+                color: "white",
+              }}
+              startAdornment={
+                <InputAdornment position="start">
+                  {/* Password icon */}
+                </InputAdornment>
+              }
+            />
+          </FormControl>
+
+          {/* Error */}
+
+          {error && (
+            <Typography
+              sx={{
+                color: "#f87171",
+                mt: 3,
+              }}
+            >
+              {error}
+            </Typography>
+          )}
+
+          {/* Login Button */}
+
+          <Button
+            onClick={handleLogin}
             variant="contained"
             size="large"
             sx={{
@@ -256,12 +381,16 @@ export default function Login() {
               textTransform: "none",
               fontWeight: 700,
               fontSize: "1.1rem",
-              background: "linear-gradient(135deg,#8b5cf6,#6366f1)",
-              boxShadow: "0 20px 60px rgba(99,102,241,.45)",
+              background:
+                "linear-gradient(135deg,#8b5cf6,#6366f1)",
+              boxShadow:
+                "0 20px 60px rgba(99,102,241,.45)",
               transition: ".3s",
+
               "&:hover": {
                 transform: "translateY(-4px)",
-                boxShadow: "0 30px 80px rgba(99,102,241,.6)",
+                boxShadow:
+                  "0 30px 80px rgba(99,102,241,.6)",
               },
             }}
           >

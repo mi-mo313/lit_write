@@ -96,25 +96,31 @@ export default function Register() {
   const adornmentId = React.useId();
   const [email, setEmail] = React.useState("");
   const [password, setPassword] = React.useState("");
-  const [userName, setuserName] = React.useState("");
-  async function regist(email: string, password: string, userName: string) {
-   const response = await apiFetcher<User>("/auth/register", {
-  method: "POST",
-  body: JSON.stringify({
-    username: userName,
-    email,
-    password,
-  }),
-});
+  const [userName, setuserName] = React.useState(""); 
+  const [ok, setOK] = React.useState(false); 
 
-console.log(response.status);
-console.log(response.data);
+ async function regist(email: string, password: string, userName: string) {
+  try {
+    const response = await apiFetcher<User>("/auth/register", {
+      method: "POST",
+      body: JSON.stringify({
+        username: userName,
+        email,
+        password,
+      }),
+    });
 
-if (response.status === 201) {
-  router.push("/login");
-}
+    console.log(response.status);
+    console.log(response.data);
+
+    if (response.status === 201) {
+      router.push("/login");
+    }
+  } catch (error) {
+    console.error(error);
+    setOK(true);
   }
-
+}
   return (
     <Box
       sx={{
@@ -314,6 +320,7 @@ if (response.status === 201) {
             register
           </Button>
         </Box>
+        {ok ? <Typography sx={{ color: "white", mt: 3 }}>Registration failed!</Typography> : <Typography sx={{ color: "white", mt: 3 }}> </Typography>}
       </Container>
     </Box>
   );

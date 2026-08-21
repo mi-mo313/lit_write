@@ -140,7 +140,7 @@ export default function Login() {
         response.data.user
       );
 
-           router.push("/editor")
+           router.push("/dashboard");
     } catch (error) {
       console.error(error);
 

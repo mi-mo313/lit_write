@@ -11,17 +11,24 @@ interface ApiResponse<T> {
   status: number;
 }
 
+interface ApiOptions extends RequestInit {
+  token?: string | null;
+}
+
 async function apiFetcher<T>(
   endpoint: string,
-  options: RequestInit = {}
+  options: ApiOptions = {}
 ): Promise<ApiResponse<T>> {
+  const { token, headers, ...requestOptions } = options;
+
   const url = `${BASE_URL}${endpoint}`;
 
   const config: RequestInit = {
-    ...options,
+    ...requestOptions,
     headers: {
       "Content-Type": "application/json",
-      ...options.headers,
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      ...headers,
     },
     credentials: "include",
   };
@@ -53,4 +60,4 @@ async function apiFetcher<T>(
 }
 
 export default apiFetcher;
-export type { ApiError, ApiResponse };
+export type { ApiError, ApiResponse, ApiOptions };

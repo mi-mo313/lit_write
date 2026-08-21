@@ -224,7 +224,7 @@ export default function LandingPage() {
 
           <Button
           onClick={()=>{
-           router.push("/editor")
+           router.push("/login")
           }}
             variant="contained"
             size="large"

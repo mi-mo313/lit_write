@@ -12,8 +12,14 @@ export interface Project {
   updatedAt?: string;
 }
 
-export type ProjectMemberRole = "member" | "admin";
-
+export type ProjectMemberRole =
+  | "owner"
+  | "admin"
+  | "member";
+  export type ProjectMember = {
+  username: string;
+  role: ProjectMemberRole;
+};
 export function getProjectId(project: Project): string {
   return project._id || project.id || "";
 }

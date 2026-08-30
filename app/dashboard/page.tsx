@@ -174,11 +174,12 @@ export default function DashboardPage() {
     setLoading(true);
 
     try {
-   const response = await getOwnedProjects(accessToken);
+      const response = await getOwnedProjects(accessToken);
 
-const list = Array.isArray(response.data.data)
-  ? response.data.data
-  : [];
+      const list = Array.isArray(response.data.data)
+        ? response.data.data
+        : [];
+
       setProjects(list);
 
       setSelectedProjectId((current) => {
@@ -210,65 +211,65 @@ const list = Array.isArray(response.data.data)
   }, [accessToken, router]);
 
   useEffect(() => {
-  let cancelled = false;
+    let cancelled = false;
 
-  async function fetchProjects() {
-    setListError("");
-    setLoading(true);
+    async function fetchProjects() {
+      setListError("");
+      setLoading(true);
 
-    try {
-      const response = await getOwnedProjects(accessToken);
+      try {
+        const response = await getOwnedProjects(accessToken);
 
-      if (cancelled) {
-        return;
-      }
-
-      const list = Array.isArray(response.data.data)
-        ? response.data.data
-        : [];
-
-      setProjects(list);
-
-      setSelectedProjectId((current) => {
-        if (
-          current &&
-          list.some((p) => getProjectId(p) === current)
-        ) {
-          return current;
+        if (cancelled) {
+          return;
         }
 
-        return list[0] ? getProjectId(list[0]) : "";
-      });
-    } catch (err) {
-      if (cancelled) {
-        return;
-      }
+        const list = Array.isArray(response.data.data)
+          ? response.data.data
+          : [];
 
-      const error = err as ApiError;
+        setProjects(list);
 
-      if (error.status === 401) {
-        router.push("/login");
-        return;
-      }
+        setSelectedProjectId((current) => {
+          if (
+            current &&
+            list.some((p) => getProjectId(p) === current)
+          ) {
+            return current;
+          }
 
-      setListError(
-        error.message || "Failed to load projects"
-      );
+          return list[0] ? getProjectId(list[0]) : "";
+        });
+      } catch (err) {
+        if (cancelled) {
+          return;
+        }
 
-      setProjects([]);
-    } finally {
-      if (!cancelled) {
-        setLoading(false);
+        const error = err as ApiError;
+
+        if (error.status === 401) {
+          router.push("/login");
+          return;
+        }
+
+        setListError(
+          error.message || "Failed to load projects"
+        );
+
+        setProjects([]);
+      } finally {
+        if (!cancelled) {
+          setLoading(false);
+        }
       }
     }
-  }
 
-  void fetchProjects();
+    void fetchProjects();
 
-  return () => {
-    cancelled = true;
-  };
-}, [accessToken, router]);
+    return () => {
+      cancelled = true;
+    };
+  }, [accessToken, router]);
 
   async function handleCreate(e: FormEvent) {
     e.preventDefault();
@@ -361,6 +362,25 @@ const list = Array.isArray(response.data.data)
   function handleLogout() {
     logout();
     router.push("/login");
+  }
+
+  // Navigate to the project detail page, passing name/id/description
+  // via query params so the detail page can render them immediately
+  // while it fetches members.
+  function handleOpenProject(project: Project) {
+    const id = getProjectId(project);
+
+    if (!id) {
+      return;
+    }
+
+    const params = new URLSearchParams({
+      id,
+      name: project.name ?? "",
+      description: project.description ?? "",
+    });
+
+    router.push(`/project/${id}?${params.toString()}`);
   }
 
   return (
@@ -520,7 +540,8 @@ const list = Array.isArray(response.data.data)
               }}
             >
               Projects you own. Create one, then invite
-              collaborators.
+              collaborators. Click a project to view its
+              members.
             </Typography>
 
             {loading && (
@@ -592,6 +613,20 @@ const list = Array.isArray(response.data.data)
                   return (
                     <Box
                       key={id || project.name}
+                      role="button"
+                      tabIndex={0}
+                      onClick={() =>
+                        handleOpenProject(project)
+                      }
+                      onKeyDown={(e) => {
+                        if (
+                          e.key === "Enter" ||
+                          e.key === " "
+                        ) {
+                          e.preventDefault();
+                          handleOpenProject(project);
+                        }
+                      }}
                       sx={{
                         p: 2.5,
                         borderRadius: 3,
@@ -600,12 +635,18 @@ const list = Array.isArray(response.data.data)
                         bgcolor:
                           "rgba(255,255,255,.03)",
                         transition: ".2s",
+                        cursor: "pointer",
 
                         "&:hover": {
                           borderColor:
                             "rgba(139,92,246,.45)",
                           bgcolor:
                             "rgba(139,92,246,.08)",
+                        },
+
+                        "&:focus-visible": {
+                          outline: "2px solid #8b5cf6",
+                          outlineOffset: 2,
                         },
                       }}
                     >

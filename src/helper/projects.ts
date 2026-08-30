@@ -47,3 +47,35 @@ export async function addProjectMember(
     }
   );
 }
+// Add these to the bottom of your existing src/helper/projects.ts
+// (same file as getOwnedProjects, createProject, addProjectMember)
+
+export interface ProjectMember {
+  username: string;
+  role: ProjectMemberRole;
+}
+
+export async function getProjectMembers(
+  projectId: string,
+  token?: string | null
+) {
+  return apiFetcher<ProjectMember[]>(
+    `/projects/${projectId}/members`,
+    {
+      token,
+    }
+  );
+}
+
+export async function deleteProject(
+  projectId: string,
+  token?: string | null
+) {
+  return apiFetcher<{ message?: string }>(
+    `/projects/${projectId}`,
+    {
+      token,
+      method: "DELETE",
+    }
+  );
+}

@@ -27,6 +27,7 @@ export interface ProjectCommit {
 }
 export default function EditorPage() {
   const [content, setContent] = useState("");
+  const [done, setDone] = useState(false);
   const [commitName, setCommitName] = useState("");
   const { id } = useParams<{ id: string }>();
 const {accessToken} = useAuth();
@@ -46,9 +47,10 @@ const {accessToken} = useAuth();
         }),
       });
 if (response.status === 201) {
-        alert("Commit saved successfully!");}
         setCommitName("");
         setContent("");
+        setDone(true);
+      }
     } catch (error) { 
       alert("Failed to save commit.");    
       alert(error
@@ -101,7 +103,14 @@ if (response.status === 201) {
           >
             project id:{id}
           </Typography>
-
+{done?  <Typography
+            sx={{
+              color: "rgba(255,255,255,.65)",
+              mb: 4,
+            }}
+          >
+            project id:{id}
+          </Typography>: null}
           <Editor value={content} onChange={setContent} />
 
           <Box

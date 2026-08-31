@@ -1,11 +1,6 @@
 "use client";
 
-import {
-  FormEvent,
-  useCallback,
-  useEffect,
-  useState,
-} from "react";
+import { FormEvent, useCallback, useEffect, useState } from "react";
 
 import {
   Box,
@@ -145,16 +140,11 @@ const menuPaperSx = {
 export default function DashboardPage() {
   const router = useRouter();
 
-  const {
-    user,
-    accessToken,
-    logout,
-  } = useAuth();
+  const { user, accessToken, logout } = useAuth();
 
   const [projects, setProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState(true);
   const [listError, setListError] = useState("");
-
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [createError, setCreateError] = useState("");
@@ -163,8 +153,7 @@ export default function DashboardPage() {
 
   const [selectedProjectId, setSelectedProjectId] = useState("");
   const [memberUserId, setMemberUserId] = useState("");
-  const [memberRole, setMemberRole] =
-    useState<ProjectMemberRole>("member");
+  const [memberRole, setMemberRole] = useState<ProjectMemberRole>("member");
   const [memberError, setMemberError] = useState("");
   const [memberSuccess, setMemberSuccess] = useState("");
   const [addingMember, setAddingMember] = useState(false);
@@ -176,17 +165,12 @@ export default function DashboardPage() {
     try {
       const response = await getOwnedProjects(accessToken);
 
-      const list = Array.isArray(response.data.data)
-        ? response.data.data
-        : [];
+      const list = Array.isArray(response.data.data) ? response.data.data : [];
 
       setProjects(list);
 
       setSelectedProjectId((current) => {
-        if (
-          current &&
-          list.some((p) => getProjectId(p) === current)
-        ) {
+        if (current && list.some((p) => getProjectId(p) === current)) {
           return current;
         }
 
@@ -200,9 +184,7 @@ export default function DashboardPage() {
         return;
       }
 
-      setListError(
-        error.message || "Failed to load projects"
-      );
+      setListError(error.message || "Failed to load projects");
 
       setProjects([]);
     } finally {
@@ -231,10 +213,7 @@ export default function DashboardPage() {
         setProjects(list);
 
         setSelectedProjectId((current) => {
-          if (
-            current &&
-            list.some((p) => getProjectId(p) === current)
-          ) {
+          if (current && list.some((p) => getProjectId(p) === current)) {
             return current;
           }
 
@@ -252,9 +231,7 @@ export default function DashboardPage() {
           return;
         }
 
-        setListError(
-          error.message || "Failed to load projects"
-        );
+        setListError(error.message || "Failed to load projects");
 
         setProjects([]);
       } finally {
@@ -287,11 +264,7 @@ export default function DashboardPage() {
     setCreating(true);
 
     try {
-      await createProject(
-        trimmedName,
-        description.trim(),
-        accessToken
-      );
+      await createProject(trimmedName, description.trim(), accessToken);
 
       setName("");
       setDescription("");
@@ -306,9 +279,7 @@ export default function DashboardPage() {
         return;
       }
 
-      setCreateError(
-        error.message || "Failed to create project"
-      );
+      setCreateError(error.message || "Failed to create project");
     } finally {
       setCreating(false);
     }
@@ -337,7 +308,7 @@ export default function DashboardPage() {
         selectedProjectId,
         memberUserId.trim(),
         memberRole,
-        accessToken
+        accessToken,
       );
 
       setMemberUserId("");
@@ -351,9 +322,7 @@ export default function DashboardPage() {
         return;
       }
 
-      setMemberError(
-        error.message || "Failed to add member"
-      );
+      setMemberError(error.message || "Failed to add member");
     } finally {
       setAddingMember(false);
     }
@@ -382,6 +351,21 @@ export default function DashboardPage() {
 
     router.push(`/project/${id}?${params.toString()}`);
   }
+    function handleOpenProjectEditor(project: Project) {
+    const id = getProjectId(project);
+
+    if (!id) {
+      return;
+    }
+
+    const params = new URLSearchParams({
+      id,
+      name: project.name ?? "",
+      description: project.description ?? "",
+    });
+
+    router.push(`/editor/${id}?${params.toString()}`);
+  }
 
   return (
     <Box
@@ -389,8 +373,7 @@ export default function DashboardPage() {
         minHeight: "100vh",
         position: "relative",
         overflow: "hidden",
-        background:
-          "linear-gradient(135deg,#020617,#0f172a,#1e1b4b)",
+        background: "linear-gradient(135deg,#020617,#0f172a,#1e1b4b)",
         py: { xs: 4, md: 6 },
       }}
     >
@@ -442,8 +425,7 @@ export default function DashboardPage() {
             gap: 2,
             mb: 4,
             pb: 3,
-            borderBottom:
-              "1px solid rgba(255,255,255,.08)",
+            borderBottom: "1px solid rgba(255,255,255,.08)",
           }}
         >
           <Box>
@@ -481,9 +463,7 @@ export default function DashboardPage() {
                 mt: 0.5,
               }}
             >
-              {user
-                ? `Signed in as ${user.username}`
-                : "Your projects hub"}
+              {user ? `Signed in as ${user.username}` : "Your projects hub"}
             </Typography>
           </Box>
 
@@ -494,17 +474,11 @@ export default function DashboardPage() {
               flexWrap: "wrap",
             }}
           >
-            <Button
-              sx={ghostButtonSx}
-              onClick={() => router.push("/editor")}
-            >
+            <Button sx={ghostButtonSx} onClick={() => router.push("/editor")}>
               Editor
             </Button>
 
-            <Button
-              sx={ghostButtonSx}
-              onClick={handleLogout}
-            >
+            <Button sx={ghostButtonSx} onClick={handleLogout}>
               Logout
             </Button>
           </Box>
@@ -539,9 +513,8 @@ export default function DashboardPage() {
                 fontSize: "0.95rem",
               }}
             >
-              Projects you own. Create one, then invite
-              collaborators. Click a project to view its
-              members.
+              Projects you own. Create one, then invite collaborators. Click a
+              project to view its members.
             </Typography>
 
             {loading && (
@@ -565,39 +538,35 @@ export default function DashboardPage() {
               </Typography>
             )}
 
-            {!loading &&
-              !listError &&
-              projects.length === 0 && (
-                <Box
+            {!loading && !listError && projects.length === 0 && (
+              <Box
+                sx={{
+                  py: 4,
+                  px: 3,
+                  borderRadius: 3,
+                  border: "1px dashed rgba(255,255,255,.15)",
+                  textAlign: "center",
+                }}
+              >
+                <Typography
                   sx={{
-                    py: 4,
-                    px: 3,
-                    borderRadius: 3,
-                    border:
-                      "1px dashed rgba(255,255,255,.15)",
-                    textAlign: "center",
+                    color: "rgba(255,255,255,.7)",
+                    mb: 1,
                   }}
                 >
-                  <Typography
-                    sx={{
-                      color: "rgba(255,255,255,.7)",
-                      mb: 1,
-                    }}
-                  >
-                    No projects yet
-                  </Typography>
+                  No projects yet
+                </Typography>
 
-                  <Typography
-                    sx={{
-                      color: "rgba(255,255,255,.45)",
-                      fontSize: "0.9rem",
-                    }}
-                  >
-                    Use the form on the right to create your
-                    first project.
-                  </Typography>
-                </Box>
-              )}
+                <Typography
+                  sx={{
+                    color: "rgba(255,255,255,.45)",
+                    fontSize: "0.9rem",
+                  }}
+                >
+                  Use the form on the right to create your first project.
+                </Typography>
+              </Box>
+            )}
 
             {!loading && projects.length > 0 && (
               <Box
@@ -615,14 +584,9 @@ export default function DashboardPage() {
                       key={id || project.name}
                       role="button"
                       tabIndex={0}
-                      onClick={() =>
-                        handleOpenProject(project)
-                      }
+                      onClick={() => handleOpenProject(project)}
                       onKeyDown={(e) => {
-                        if (
-                          e.key === "Enter" ||
-                          e.key === " "
-                        ) {
+                        if (e.key === "Enter" || e.key === " ") {
                           e.preventDefault();
                           handleOpenProject(project);
                         }
@@ -630,18 +594,14 @@ export default function DashboardPage() {
                       sx={{
                         p: 2.5,
                         borderRadius: 3,
-                        border:
-                          "1px solid rgba(255,255,255,.08)",
-                        bgcolor:
-                          "rgba(255,255,255,.03)",
+                        border: "1px solid rgba(255,255,255,.08)",
+                        bgcolor: "rgba(255,255,255,.03)",
                         transition: ".2s",
                         cursor: "pointer",
 
                         "&:hover": {
-                          borderColor:
-                            "rgba(139,92,246,.45)",
-                          bgcolor:
-                            "rgba(139,92,246,.08)",
+                          borderColor: "rgba(139,92,246,.45)",
+                          bgcolor: "rgba(139,92,246,.08)",
                         },
 
                         "&:focus-visible": {
@@ -663,8 +623,7 @@ export default function DashboardPage() {
                       {project.description && (
                         <Typography
                           sx={{
-                            color:
-                              "rgba(255,255,255,.55)",
+                            color: "rgba(255,255,255,.55)",
                             fontSize: "0.9rem",
                             mb: 1,
                           }}
@@ -674,17 +633,35 @@ export default function DashboardPage() {
                       )}
 
                       {id && (
-                        <Typography
+                        <Box
                           sx={{
-                            color:
-                              "rgba(167,139,250,.8)",
-                            fontSize: "0.75rem",
-                            fontFamily:
-                              "var(--font-geist-mono), monospace",
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "space-between",
+                            gap: 1,
+                            mt: 1,
                           }}
                         >
-                          {id}
-                        </Typography>
+                          <Typography
+                            sx={{
+                              color: "rgba(167,139,250,.8)",
+                              fontSize: "0.75rem",
+                              fontFamily: "var(--font-geist-mono), monospace",
+                            }}
+                          >
+                            {id}
+                          </Typography>
+
+                          <Button
+                            size="small"
+                            onClick={
+                          (e) =>{ e.stopPropagation()
+                            handleOpenProjectEditor(project)}}
+                            sx={ghostButtonSx}
+                          >
+                            Add commit
+                          </Button>
+                        </Box>
                       )}
                     </Box>
                   );
@@ -700,11 +677,7 @@ export default function DashboardPage() {
               gap: 3,
             }}
           >
-            <Box
-              component="form"
-              onSubmit={handleCreate}
-              sx={glassPanelSx}
-            >
+            <Box component="form" onSubmit={handleCreate} sx={glassPanelSx}>
               <Typography
                 sx={{
                   color: "white",
@@ -741,9 +714,7 @@ export default function DashboardPage() {
                 fullWidth
                 label="Description"
                 value={description}
-                onChange={(e) =>
-                  setDescription(e.target.value)
-                }
+                onChange={(e) => setDescription(e.target.value)}
                 multiline
                 minRows={2}
                 sx={{
@@ -782,17 +753,11 @@ export default function DashboardPage() {
                 disabled={creating}
                 sx={primaryButtonSx}
               >
-                {creating
-                  ? "Creating…"
-                  : "Create project"}
+                {creating ? "Creating…" : "Create project"}
               </Button>
             </Box>
 
-            <Box
-              component="form"
-              onSubmit={handleAddMember}
-              sx={glassPanelSx}
-            >
+            <Box component="form" onSubmit={handleAddMember} sx={glassPanelSx}>
               <Typography
                 sx={{
                   color: "white",
@@ -811,8 +776,7 @@ export default function DashboardPage() {
                   fontSize: "0.9rem",
                 }}
               >
-                Invite someone to an owned project by user
-                ID.
+                Invite someone to an owned project by user ID.
               </Typography>
 
               <FormControl
@@ -822,17 +786,13 @@ export default function DashboardPage() {
                   mb: 2,
                 }}
               >
-                <InputLabel id="project-select-label">
-                  Project
-                </InputLabel>
+                <InputLabel id="project-select-label">Project</InputLabel>
 
                 <Select
                   labelId="project-select-label"
                   label="Project"
                   value={selectedProjectId}
-                  onChange={(e) =>
-                    setSelectedProjectId(e.target.value)
-                  }
+                  onChange={(e) => setSelectedProjectId(e.target.value)}
                   disabled={projects.length === 0}
                   MenuProps={{
                     slotProps: {
@@ -846,10 +806,7 @@ export default function DashboardPage() {
                     const id = getProjectId(project);
 
                     return (
-                      <MenuItem
-                        key={id}
-                        value={id}
-                      >
+                      <MenuItem key={id} value={id}>
                         {project.name}
                       </MenuItem>
                     );
@@ -861,9 +818,7 @@ export default function DashboardPage() {
                 fullWidth
                 label="User ID"
                 value={memberUserId}
-                onChange={(e) =>
-                  setMemberUserId(e.target.value)
-                }
+                onChange={(e) => setMemberUserId(e.target.value)}
                 sx={{
                   ...fieldSx,
                   mb: 2,
@@ -877,18 +832,14 @@ export default function DashboardPage() {
                   mb: 2,
                 }}
               >
-                <InputLabel id="role-select-label">
-                  Role
-                </InputLabel>
+                <InputLabel id="role-select-label">Role</InputLabel>
 
                 <Select
                   labelId="role-select-label"
                   label="Role"
                   value={memberRole}
                   onChange={(e) =>
-                    setMemberRole(
-                      e.target.value as ProjectMemberRole
-                    )
+                    setMemberRole(e.target.value as ProjectMemberRole)
                   }
                   MenuProps={{
                     slotProps: {
@@ -898,13 +849,9 @@ export default function DashboardPage() {
                     },
                   }}
                 >
-                  <MenuItem value="member">
-                    member
-                  </MenuItem>
+                  <MenuItem value="member">member</MenuItem>
 
-                  <MenuItem value="admin">
-                    admin
-                  </MenuItem>
+                  <MenuItem value="admin">admin</MenuItem>
                 </Select>
               </FormControl>
 
@@ -935,15 +882,10 @@ export default function DashboardPage() {
               <Button
                 type="submit"
                 variant="contained"
-                disabled={
-                  addingMember ||
-                  projects.length === 0
-                }
+                disabled={addingMember || projects.length === 0}
                 sx={primaryButtonSx}
               >
-                {addingMember
-                  ? "Adding…"
-                  : "Add member"}
+                {addingMember ? "Adding…" : "Add member"}
               </Button>
             </Box>
           </Box>

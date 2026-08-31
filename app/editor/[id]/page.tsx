@@ -11,17 +11,50 @@ import {
 } from "@mui/material";
 
 import Editor from "@/components/Editor";
+import { useParams } from "next/navigation";
+import apiFetcher from "@/helper/apiFetcher";
+import { useAuth } from "@/context/auth";
 
+export interface ProjectCommit {
+  id: string;
+  projectId: string;
+  ownerId: string;
+  chapter: string;
+  text: string;
+  message: string;
+  hash: string;
+  createdAt: string;
+}
 export default function EditorPage() {
   const [content, setContent] = useState("");
   const [commitName, setCommitName] = useState("");
-
-  const handleSave = () => {
-    console.log({
-      commitName,
-      content,
-    });
-  };
+  const { id } = useParams<{ id: string }>();
+const {accessToken} = useAuth();
+  async function handleSave() {
+    try {
+      const response = await apiFetcher<ProjectCommit>(`/commits/${id}`, {
+        method: "POST",
+        token: accessToken,
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+        body: JSON.stringify({
+          content: {
+            content,
+          },
+          commitMessage: commitName,
+        }),
+      });
+if (response.status === 201) {
+        alert("Commit saved successfully!");}
+        setCommitName("");
+        setContent("");
+    } catch (error) { 
+      alert("Failed to save commit.");    
+      alert(error
+      );    
+    }
+  }
 
   return (
     <Box
@@ -60,11 +93,16 @@ export default function EditorPage() {
           >
             Write your next revision.
           </Typography>
+          <Typography
+            sx={{
+              color: "rgba(255,255,255,.65)",
+              mb: 4,
+            }}
+          >
+            project id:{id}
+          </Typography>
 
-          <Editor
-            value={content}
-            onChange={setContent}
-          />
+          <Editor value={content} onChange={setContent} />
 
           <Box
             sx={{
